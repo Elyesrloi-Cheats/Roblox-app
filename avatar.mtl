@@ -1,0 +1,28 @@
+newmtl Player1Mtl
+Material Color
+Ka 0.909804 0.72549 0.584314
+Kd 0.909804 0.72549 0.584314
+Ks 0.0570857 0.045521 0.0366628 
+
+d 1
+
+Ns 0
+
+map_Ka Elyesrloi_Emo1Tex.png
+map_Kd Elyesrloi_Emo1Tex.png
+map_d Elyesrloi_Emo1Tex.png
+
+newmtl Handle1Mtl
+Material Color
+Ka 0.639216 0.635294 0.647059
+Kd 0.639216 0.635294 0.647059
+Ks 0.0401077 0.0398616 0.0405998 
+
+d 1
+
+Ns 0
+
+map_Ka Elyesrloi_Emo2Tex.png
+map_Kd Elyesrloi_Emo2Tex.png
+map_d Elyesrloi_Emo2Tex.png
+
