@@ -37,7 +37,7 @@
     /* HEADER ACCUEIL */
     header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fff; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #f0f0f0; }
     .brand { display: flex; align-items: center; gap: 6px; }
-    .logo-img { height: 26px; object-fit: contain; } /* Style pour le vrai logo */
+    .logo-img { height: 26px; object-fit: contain; }
     .header-right { display: flex; gap: 16px; align-items: center; }
     .header-icon { width: 22px; height: 22px; cursor: pointer; }
 
@@ -108,7 +108,7 @@
     .chat-date { font-size: 13px; color: #555; font-weight: 500; }
     .chat-arrow { color: #111; width: 18px; height: 18px; }
 
-    /* INTERFACE CONVERSATION UNIQUE */
+    /* INTERFACE CONVERSATION UNIQUE (AVEC SUPPORT DE CHAT INTERACTIF) */
     #chat-detail-subview { display: none; background: #f8f9fa; min-height: calc(100vh - 65px); flex-direction: column; justify-content: space-between; }
     .detail-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; }
     .detail-left { display: flex; align-items: center; gap: 12px; }
@@ -120,7 +120,7 @@
     .detail-handle { font-size: 11px; color: #666; }
     .btn-commencer { background: #e0e0e0; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
 
-    .detail-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; flex-grow: 1; }
+    .detail-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; flex-grow: 1; overflow-y: auto; }
     .info-card { background: #fff; border-radius: 16px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .card-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; }
     .card-display-name { font-size: 15px; font-weight: 700; }
@@ -128,7 +128,18 @@
     .card-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
     .card-desc { font-size: 12px; color: #444; line-height: 1.4; }
 
-    .chat-unavailable { font-size: 12px; color: #333; text-align: center; margin-top: auto; font-weight: 600; }
+    /* Bulles de message du chat envoyées */
+    .chat-bubble-sent {
+      background: #0084ff;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 14px 14px 2px 14px;
+      align-self: flex-end;
+      max-width: 75%;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
     .input-box-container { padding: 12px 16px; background: #fff; border-top: 1px solid #eee; }
     .input-box { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; outline: none; }
 
@@ -380,7 +391,7 @@
       </div>
     </div>
 
-    <!-- SOUS-VUE 2 : DÉTAIL D'UNE CONVERSATION -->
+    <!-- SOUS-VUE 2 : DÉTAIL D'UNE CONVERSATION (INTERACTIF) -->
     <div id="chat-detail-subview">
       <div class="detail-top-bar">
         <div class="detail-left">
@@ -396,7 +407,7 @@
         <button class="btn-commencer">Commencer</button>
       </div>
 
-      <div class="detail-body">
+      <div class="detail-body" id="chat-body-scroll">
         <div class="info-card">
           <img src="" id="chat-detail-card-img" class="card-avatar" alt="Avatar">
           <span id="chat-detail-card-name" class="card-display-name"></span>
@@ -408,13 +419,12 @@
           </p>
         </div>
 
-        <div class="chat-unavailable">
-          Chat indisponible : crée une Party pour jouer avec tes amis !
-        </div>
+        <!-- Conteneur des messages envoyés -->
+        <div id="chat-messages-container" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"></div>
       </div>
 
       <div class="input-box-container">
-        <input type="text" class="input-box" placeholder="Dire quelque chose" />
+        <input type="text" class="input-box" id="chat-message-input" placeholder="Dire quelque chose" onkeypress="handleChatKeyPress(event)" />
       </div>
     </div>
   </div>
@@ -528,9 +538,8 @@
     </div>
   </div>
 
-  <!-- MODALE PAIEMENT ACHAT ROBUX (AVEC CROIX AJOUTÉE EN HAUT À DROITE) -->
+  <!-- MODALE PAIEMENT ACHAT ROBUX (AVEC CROIX) -->
   <div class="modal-overlay" id="payment-modal">
-    <!-- ÉTAPE 1 -->
     <div class="modal-box" id="modal-step-1">
       <i data-lucide="x" class="modal-close-cross" onclick="closePayment()"></i>
       <h3>Mode de paiement</h3>
@@ -549,7 +558,6 @@
       <button class="btn-submit" onclick="goToStep(2)">Continuer</button>
     </div>
 
-    <!-- ÉTAPE 2 -->
     <div class="modal-box" id="modal-step-2" style="display:none;">
       <i data-lucide="x" class="modal-close-cross" onclick="closePayment()"></i>
       <h3>Confirmation d'âge</h3>
@@ -560,7 +568,6 @@
       <button class="btn-submit" onclick="confirmPurchase()">Valider l'achat</button>
     </div>
 
-    <!-- ÉTAPE 3 -->
     <div class="modal-box" id="modal-step-3" style="display:none;">
       <i data-lucide="x" class="modal-close-cross" onclick="closePayment()"></i>
       <i data-lucide="check-circle" style="width:48px; height:48px; color:#10b981; margin-bottom:10px;"></i>
@@ -733,17 +740,12 @@
       lucide.createIcons();
     }
 
-    /* GESTION NOTIFICATION ROBUX : OUVRE L'INTERFACE ROBUX ET LANCE LE DÉFILEMENT */
+    /* GESTION NOTIFICATION ROBUX */
     function claimNotifRobux() {
       const oldVal = userRobux;
       userRobux += 275000;
-      
-      // Bascule instantanément sur l'interface des Robux
       switchView('robux');
-      
-      // Lance l'animation de défilement des chiffres
       animateRobuxChange(oldVal, userRobux, 2500); 
-      
       document.getElementById('notif-card-20years').style.display = 'none';
     }
 
@@ -762,6 +764,9 @@
       document.getElementById('chat-detail-card-img').src = imgSrc;
       document.getElementById('chat-detail-card-title').innerText = `Première conversation avec ${displayName}`;
 
+      // Nettoie l'ancien historique en changeant de conversation
+      document.getElementById('chat-messages-container').innerHTML = '';
+
       document.getElementById('chat-list-subview').style.display = 'none';
       document.getElementById('chat-detail-subview').style.display = 'flex';
       lucide.createIcons();
@@ -770,6 +775,28 @@
     function closeChatDetail() {
       document.getElementById('chat-detail-subview').style.display = 'none';
       document.getElementById('chat-list-subview').style.display = 'block';
+    }
+
+    /* ENVOI DE MESSAGE CHAT INTERACTIF (TOUCHE ENTRÉE) */
+    function handleChatKeyPress(event) {
+      if (event.key === 'Enter') {
+        const input = document.getElementById('chat-message-input');
+        const messageText = input.value.trim();
+        
+        if (messageText !== '') {
+          const container = document.getElementById('chat-messages-container');
+          
+          const bubble = document.createElement('div');
+          bubble.className = 'chat-bubble-sent';
+          bubble.innerText = messageText;
+          
+          container.appendChild(bubble);
+          
+          input.value = '';
+          const bodyScroll = document.getElementById('chat-body-scroll');
+          bodyScroll.scrollTop = bodyScroll.scrollHeight;
+        }
+      }
     }
 
     /* OUVERTURE DYNAMIQUE DE LA MODALE JEU */
