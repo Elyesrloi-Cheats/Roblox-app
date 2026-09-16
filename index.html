@@ -169,6 +169,20 @@
     .modal-overlay.active { display: flex !important; }
     .modal-box { background: #fff; width: 88%; max-width: 380px; border-radius: 16px; padding: 20px; text-align: center; position: relative; }
     
+    /* STYLE DE LA CROIX EN HAUT À DROITE DE LA FENÊTRE D'ACHAT */
+    .modal-close-cross {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      color: #666;
+    }
+    .modal-close-cross:hover {
+      color: #000;
+    }
+
     .payment-option { display: flex; align-items: center; gap: 12px; border: 2px solid #e0e0e0; padding: 12px; border-radius: 10px; margin: 8px 0; cursor: pointer; transition: all 0.2s ease; text-align: left; font-weight: 600; }
     .payment-option.selected { border-color: #0084ff; background-color: #f0f7ff; color: #0084ff; }
 
@@ -514,9 +528,11 @@
     </div>
   </div>
 
-  <!-- MODALE PAIEMENT ACHAT ROBUX -->
+  <!-- MODALE PAIEMENT ACHAT ROBUX (AVEC CROIX AJOUTÉE EN HAUT À DROITE) -->
   <div class="modal-overlay" id="payment-modal">
+    <!-- ÉTAPE 1 -->
     <div class="modal-box" id="modal-step-1">
+      <i data-lucide="x" class="modal-close-cross" onclick="closePayment()"></i>
       <h3>Mode de paiement</h3>
       <p id="pack-details" style="font-size:13px; color:#666; margin-bottom:15px;"></p>
       
@@ -533,7 +549,9 @@
       <button class="btn-submit" onclick="goToStep(2)">Continuer</button>
     </div>
 
+    <!-- ÉTAPE 2 -->
     <div class="modal-box" id="modal-step-2" style="display:none;">
+      <i data-lucide="x" class="modal-close-cross" onclick="closePayment()"></i>
       <h3>Confirmation d'âge</h3>
       <p style="font-size:13px; color:#555; margin:15px 0;">Confirmez-vous avoir au moins 18 ans ou l'autorisation d'un parent ?</p>
       <label style="display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:15px; font-size:13px; cursor:pointer;">
@@ -542,7 +560,9 @@
       <button class="btn-submit" onclick="confirmPurchase()">Valider l'achat</button>
     </div>
 
+    <!-- ÉTAPE 3 -->
     <div class="modal-box" id="modal-step-3" style="display:none;">
+      <i data-lucide="x" class="modal-close-cross" onclick="closePayment()"></i>
       <i data-lucide="check-circle" style="width:48px; height:48px; color:#10b981; margin-bottom:10px;"></i>
       <h3>Achat effectué !</h3>
       <p id="purchase-success-text" style="font-size:13px; color:#555; margin-top:8px;"></p>
@@ -718,10 +738,10 @@
       const oldVal = userRobux;
       userRobux += 275000;
       
-      // Bascule instantanément sur l'interface des Robux (image 2)
+      // Bascule instantanément sur l'interface des Robux
       switchView('robux');
       
-      // Lance l'animation de défilement des chiffres de 2 à 275 002
+      // Lance l'animation de défilement des chiffres
       animateRobuxChange(oldVal, userRobux, 2500); 
       
       document.getElementById('notif-card-20years').style.display = 'none';
