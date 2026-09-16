@@ -108,7 +108,7 @@
     .chat-date { font-size: 13px; color: #555; font-weight: 500; }
     .chat-arrow { color: #111; width: 18px; height: 18px; }
 
-    /* INTERFACE CONVERSATION UNIQUE (AVEC SUPPORT DE CHAT INTERACTIF) */
+    /* INTERFACE CONVERSATION UNIQUE (AVEC CHAT INTERACTIF) */
     #chat-detail-subview { display: none; background: #f8f9fa; min-height: calc(100vh - 65px); flex-direction: column; justify-content: space-between; }
     .detail-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; }
     .detail-left { display: flex; align-items: center; gap: 12px; }
@@ -128,7 +128,7 @@
     .card-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
     .card-desc { font-size: 12px; color: #444; line-height: 1.4; }
 
-    /* Bulles de message du chat envoyées */
+    /* Bulles de message du chat */
     .chat-bubble-sent {
       background: #0084ff;
       color: #fff;
@@ -391,7 +391,7 @@
       </div>
     </div>
 
-    <!-- SOUS-VUE 2 : DÉTAIL D'UNE CONVERSATION (INTERACTIF) -->
+    <!-- SOUS-VUE 2 : DÉTAIL D'UNE CONVERSATION -->
     <div id="chat-detail-subview">
       <div class="detail-top-bar">
         <div class="detail-left">
@@ -538,7 +538,7 @@
     </div>
   </div>
 
-  <!-- MODALE PAIEMENT ACHAT ROBUX (AVEC CROIX) -->
+  <!-- MODALE PAIEMENT ACHAT ROBUX (AVEC CROIX EN HAUT À DROITE) -->
   <div class="modal-overlay" id="payment-modal">
     <div class="modal-box" id="modal-step-1">
       <i data-lucide="x" class="modal-close-cross" onclick="closePayment()"></i>
@@ -691,6 +691,23 @@
 
     lucide.createIcons();
 
+    /* LISTE DES MOTS INTERDITS À FLOUTER (CENSURE) */
+    const badWords = [
+      "ntm", "nktm", "nique ta mere", "nique ta mère", "tg", "ta gueule", 
+      "connard", "connasse", "pute", "salope", "enculé", "fils de pute", 
+      "merde", "putain", "fdp", "nique"
+    ];
+
+    function censorMessage(text) {
+      let censoredText = text;
+      badWords.forEach(word => {
+        const regex = new RegExp(word, 'gi');
+        const replacement = '#'.repeat(word.length);
+        censoredText = censoredText.replace(regex, replacement);
+      });
+      return censoredText;
+    }
+
     /* FONCTION DE DÉFILEMENT (ANIMATION) DU SOLDE DE ROBUX */
     function animateRobuxChange(startVal, endVal, duration = 2000) {
       let startTime = null;
@@ -764,7 +781,6 @@
       document.getElementById('chat-detail-card-img').src = imgSrc;
       document.getElementById('chat-detail-card-title').innerText = `Première conversation avec ${displayName}`;
 
-      // Nettoie l'ancien historique en changeant de conversation
       document.getElementById('chat-messages-container').innerHTML = '';
 
       document.getElementById('chat-list-subview').style.display = 'none';
@@ -777,13 +793,14 @@
       document.getElementById('chat-list-subview').style.display = 'block';
     }
 
-    /* ENVOI DE MESSAGE CHAT INTERACTIF (TOUCHE ENTRÉE) */
+    /* ENVOI DE MESSAGE CHAT (AVEC CENSURE AUTOMATIQUE) */
     function handleChatKeyPress(event) {
       if (event.key === 'Enter') {
         const input = document.getElementById('chat-message-input');
-        const messageText = input.value.trim();
+        const rawText = input.value.trim();
         
-        if (messageText !== '') {
+        if (rawText !== '') {
+          const messageText = censorMessage(rawText);
           const container = document.getElementById('chat-messages-container');
           
           const bubble = document.createElement('div');
